@@ -7,6 +7,7 @@ import SkillsSection from './components/SkillsSection';
 import ExperienceSection from './components/ExperienceSection';
 import ProjectsSection from './components/ProjectsSection';
 import EducationSection from './components/EducationSection';
+import heroImage from './assets/hero.jpg';
 
 const CVPortfolio = () => {
   const [typewriterText, setTypewriterText] = useState('');
@@ -309,7 +310,7 @@ const experiences = [
             className="mb-8"
           >
             <img
-              src="/src/assets/hero.jpg"
+              src={heroImage}
               alt="Bagus Slamet Oetomo"
               className="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-neon-cyan neon-glow"
             />
