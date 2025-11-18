@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 
 const SkillsSection = ({ skillsRef, skills }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [currentPage, setCurrentPage] = useState(0);
 
   const skillData = skills.map(skill => ({
     name: skill,
     level: skill === 'CodeIgniter' ? 90 : skill === 'Laravel' ? 85 : skill === 'Flutter' ? 80 : 75
   }));
+
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(skillData.length / itemsPerPage);
+  const paginatedSkills = skillData.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
 
   return (
     <section ref={skillsRef} className="py-20 px-4">
@@ -33,8 +38,8 @@ const SkillsSection = ({ skillsRef, skills }) => {
           className="glass-card p-8 rounded-2xl"
         >
           {/* Skills Grid/List */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {skillData.map((skill, index) => (
+          <div className="md:hidden space-y-4">
+            {paginatedSkills.map((skill, index) => (
               <motion.div
                 key={skill.name}
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -43,7 +48,7 @@ const SkillsSection = ({ skillsRef, skills }) => {
                 className="group"
               >
                 {/* Mobile: Horizontal List Layout */}
-                <div className="md:hidden flex items-center space-x-4 p-4 rounded-lg bg-gradient-to-r from-gray-800/50 to-gray-700/50 border border-gray-600/50 hover:border-neon-cyan/50 transition-all duration-300">
+                <div className="flex items-center space-x-4 p-4 rounded-lg bg-gradient-to-r from-gray-800/50 to-gray-700/50 border border-gray-600/50 hover:border-neon-cyan/50 transition-all duration-300">
                   {/* Skill Icon */}
                   <motion.div
                     className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-neon-cyan/20 to-neon-blue/20 border border-gray-600 group-hover:border-neon-cyan transition-all duration-300 flex items-center justify-center"
@@ -90,9 +95,21 @@ const SkillsSection = ({ skillsRef, skills }) => {
                     </div>
                   </div>
                 </div>
+              </motion.div>
+            ))}
+          </div>
 
-                {/* Desktop: Vertical Card Layout */}
-                <div className="hidden md:block text-center group">
+          {/* Desktop: Vertical Card Layout */}
+          <div className="hidden md:block">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {skillData.map((skill, index) => (
+                <motion.div
+                  key={skill.name}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
+                  className="text-center group"
+                >
                   {/* Skill Icon */}
                   <div className="relative mb-6">
                     <motion.div
@@ -175,9 +192,30 @@ const SkillsSection = ({ skillsRef, skills }) => {
                       </motion.div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Pagination */}
+          <div className="md:hidden flex justify-center items-center space-x-4 mt-8">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+              disabled={currentPage === 0}
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-neon-cyan/20 to-neon-blue/20 border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:border-neon-cyan transition-all duration-300 text-white font-medium"
+            >
+              Previous
+            </button>
+            <span className="text-gray-300">
+              {currentPage + 1} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+              disabled={currentPage === totalPages - 1}
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-neon-cyan/20 to-neon-blue/20 border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:border-neon-cyan transition-all duration-300 text-white font-medium"
+            >
+              Next
+            </button>
           </div>
 
           {/* Skills Summary */}
@@ -187,7 +225,7 @@ const SkillsSection = ({ skillsRef, skills }) => {
             transition={{ duration: 0.8, delay: 1 }}
             className="mt-12 pt-8 border-t border-gray-600"
           >
-            <div className="grid grid-cols-3 gap-6 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div className="p-4 rounded-lg bg-gradient-to-br from-neon-cyan/5 to-transparent border border-neon-cyan/20">
                 <div className="text-3xl font-bold text-neon-cyan mb-2">
                   {skillData.filter(s => s.level >= 85).length}

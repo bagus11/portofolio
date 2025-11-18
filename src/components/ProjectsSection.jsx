@@ -11,7 +11,8 @@ const ProjectsSection = ({ projects }) => {
   useEffect(() => {
     if (selectedProject !== null && scrollContainerRef.current) {
       const container = scrollContainerRef.current;
-      const selectedCard = container.children[selectedProject];
+      const flexContainer = container.children[0]; // The flex container div
+      const selectedCard = flexContainer.children[selectedProject];
       if (selectedCard) {
         const containerWidth = container.offsetWidth;
         const cardWidth = selectedCard.offsetWidth;
@@ -133,7 +134,7 @@ const ProjectsSection = ({ projects }) => {
                    <div className="space-y-2">
                      <div className="text-xs text-gray-400 font-mono">TECH_STACK:</div>
                      <div className="flex flex-wrap gap-2">
-                       {project.tech.split(' ').map((tech, techIndex) => (
+                       {project.tech.split('+').map((tech, techIndex) => (
                          <motion.span
                            key={tech}
                            initial={{ opacity: 0, scale: 0.8 }}

@@ -42,13 +42,21 @@ const ExperienceSection = ({ experienceRef, experiences }) => {
                     selectedExperience === index ? 'bg-neon-cyan scale-125' : 'bg-neon-cyan/50'
                   }`}></div>
 
-                  <div className={`glass-card p-6 rounded-xl transition-all duration-300 ${
-                    selectedExperience === index ? 'border-2 border-neon-cyan shadow-2xl shadow-neon-cyan/20' : 'hover:border-neon-cyan/50'
-                  }`}>
+                  <motion.div
+                    className={`glass-card p-6 rounded-xl transition-all duration-300 ${
+                      selectedExperience === index ? 'border-2 border-neon-cyan shadow-2xl shadow-neon-cyan/20' : 'hover:border-neon-cyan/50'
+                    }`}
+                    whileHover={{
+                      scale: 1.05,
+                      boxShadow: '0 0 25px rgba(0, 255, 255, 0.3)',
+                      transition: { duration: 0.3 }
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                  >
                     <h3 className="text-xl font-semibold text-neon-cyan mb-2">{exp.title}</h3>
                     <p className="text-neon-blue mb-2">{exp.company}</p>
                     <p className="text-sm text-gray-400">{exp.period}</p>
-                  </div>
+                  </motion.div>
                 </motion.div>
               ))}
             </motion.div>

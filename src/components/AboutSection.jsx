@@ -58,51 +58,7 @@ const AboutSection = ({ aboutRef }) => {
            I’m a full-stack developer passionate about crafting clean, scalable, and secure applications. With experience in Laravel, CodeIgniter, Flutter, and Golang, I handle everything from backend logic and frontend design to server setup and security optimization.
           </p>
 
-          {/* Contact Information */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              className="flex items-center space-x-3 p-4 rounded-lg bg-gradient-to-r from-gray-800/50 to-gray-700/50 border border-gray-600/50 hover:border-neon-cyan/50 transition-all duration-300 group cursor-pointer"
-              onClick={() => window.open('mailto:bagus.oetomo11@gmail.com', '_blank')}
-            >
-              <div className="text-2xl group-hover:text-neon-cyan transition-colors">📧</div>
-              <div>
-                <div className="text-sm text-gray-400">Email</div>
-                <div className="text-neon-cyan font-medium group-hover:text-white transition-colors">bagus.oetomo11@gmail.com</div>
-              </div>
-            </motion.div>
 
-            {/* WhatsApp Button - Centered */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: 0.9 }}
-              className="flex items-center space-x-3 p-4 rounded-lg bg-gradient-to-r from-gray-800/50 to-gray-700/50 border border-gray-600/50 hover:border-green-500/50 transition-all duration-300 group cursor-pointer"
-              onClick={() => window.open('https://wa.me/6287786873454', '_blank')}
-            >
-              <div className="text-2xl group-hover:text-green-400 transition-colors">💬</div>
-              <div>
-                <div className="text-sm text-gray-400">WhatsApp</div>
-                <div className="text-neon-cyan font-medium group-hover:text-white transition-colors">+6287786873454</div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
-              transition={{ duration: 0.6, delay: 1.0 }}
-              className="flex items-center space-x-3 p-4 rounded-lg bg-gradient-to-r from-gray-800/50 to-gray-700/50 border border-gray-600/50 hover:border-blue-500/50 transition-all duration-300 group cursor-pointer"
-              onClick={() => window.open('https://www.linkedin.com/in/bagus-slamet-oetomo-61534b1a6/', '_blank')}
-            >
-              <div className="text-2xl group-hover:text-blue-400 transition-colors">💼</div>
-              <div>
-                <div className="text-sm text-gray-400">LinkedIn</div>
-                <div className="text-neon-cyan font-medium group-hover:text-white transition-colors">Bagus Slamet Oetomo</div>
-              </div>
-            </motion.div>
-          </div>
 
           {/* Tech highlights - Horizontal scroll on mobile */}
           <div className="overflow-x-auto pb-4">

@@ -7,12 +7,26 @@ import SkillsSection from './components/SkillsSection';
 import ExperienceSection from './components/ExperienceSection';
 import ProjectsSection from './components/ProjectsSection';
 import EducationSection from './components/EducationSection';
+import ContactSection from './components/ContactSection';
 import heroImage from './assets/hero.jpg';
+
+const codeSnippets = [
+  'const developer = { skills: ["React", "Node.js", "Python"], passion: "coding" };',
+  'function buildFuture() { return "innovative solutions"; }',
+  'while(true) { innovate(); create(); deploy(); }',
+  'git commit -m "Building tomorrow\'s technology today"',
+  'npm install creativity && npm install innovation',
+  'docker run -it --name future /dev/null'
+];
 
 const CVPortfolio = () => {
   const [typewriterText, setTypewriterText] = useState('');
   const [navbarVisible, setNavbarVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
+  const [codeSnippet, setCodeSnippet] = useState('');
+  const [currentSnippetIndex, setCurrentSnippetIndex] = useState(0);
   const fullText = '> Hello, I’m Tomo — Fullstack Developer';
 
   // Refs for sections
@@ -22,6 +36,7 @@ const CVPortfolio = () => {
   const experienceRef = useRef(null);
   const projectsRef = useRef(null);
   const educationRef = useRef(null);
+  const contactRef = useRef(null);
 
   useEffect(() => {
     // Simulate loading time
@@ -48,6 +63,34 @@ const CVPortfolio = () => {
   }, [isLoading]);
 
   useEffect(() => {
+    if (!isLoading) {
+      const snippetTimer = setInterval(() => {
+        setCurrentSnippetIndex((prev) => (prev + 1) % codeSnippets.length);
+      }, 3000);
+
+      return () => clearInterval(snippetTimer);
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setCodeSnippet(''); // Reset snippet
+      let i = 0;
+      const currentSnippet = codeSnippets[currentSnippetIndex];
+      const typeTimer = setInterval(() => {
+        if (i <= currentSnippet.length) {
+          setCodeSnippet(currentSnippet.slice(0, i));
+          i++;
+        } else {
+          clearInterval(typeTimer);
+        }
+      }, 50);
+
+      return () => clearInterval(typeTimer);
+    }
+  }, [currentSnippetIndex, isLoading]);
+
+  useEffect(() => {
     let scrollTimer;
 
     const handleScroll = () => {
@@ -60,6 +103,31 @@ const CVPortfolio = () => {
           setNavbarVisible(false);
         }
       }, 2000);
+
+      // Update active section based on scroll position
+      const sections = [
+        { id: 'home', ref: heroRef },
+        { id: 'about', ref: aboutRef },
+        { id: 'skills', ref: skillsRef },
+        { id: 'experience', ref: experienceRef },
+        { id: 'projects', ref: projectsRef },
+        { id: 'education', ref: educationRef },
+        { id: 'contact', ref: contactRef },
+      ];
+
+      const scrollPosition = window.scrollY + 100;
+
+      for (const section of sections) {
+        if (section.ref.current) {
+          const offsetTop = section.ref.current.offsetTop;
+          const offsetBottom = offsetTop + section.ref.current.offsetHeight;
+
+          if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
+            setActiveSection(section.id);
+            break;
+          }
+        }
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -69,11 +137,97 @@ const CVPortfolio = () => {
     };
   }, []);
 
-  const scrollToSection = (ref) => {
-    ref.current?.scrollIntoView({ behavior: 'smooth' });
+  // Disable right-click, inspect element, and Ctrl+U
+  useEffect(() => {
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const handleKeyDown = (e) => {
+      // Disable F12 (inspect element)
+      if (e.keyCode === 123) {
+        e.preventDefault();
+        return false;
+      }
+      // Disable Ctrl+U (view source)
+      if (e.ctrlKey && e.keyCode === 85) {
+        e.preventDefault();
+        return false;
+      }
+      // Disable Ctrl+Shift+I (inspect element)
+      if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+        e.preventDefault();
+        return false;
+      }
+      // Disable Ctrl+Shift+C (inspect element)
+      if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+        e.preventDefault();
+        return false;
+      }
+      // Disable Ctrl+Shift+J (console)
+      if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+        e.preventDefault();
+        return false;
+      }
+      // Disable Ctrl+Shift+K (console in some browsers)
+      if (e.ctrlKey && e.shiftKey && e.keyCode === 75) {
+        e.preventDefault();
+        return false;
+      }
+      // Disable F1 (help menu that can lead to dev tools)
+      if (e.keyCode === 112) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    // Detect and auto-close developer tools
+    const checkDevTools = () => {
+      const threshold = 160; // Threshold for detecting dev tools
+      const check = () => {
+        if (window.outerHeight - window.innerHeight > threshold || window.outerWidth - window.innerWidth > threshold) {
+          // Developer tools detected, redirect to blank page
+          window.location.href = 'about:blank';
+        }
+      };
+
+      // Check every 500ms
+      const interval = setInterval(check, 500);
+
+      return () => clearInterval(interval);
+    };
+
+    const cleanupDevToolsCheck = checkDevTools();
+
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+      cleanupDevToolsCheck();
+    };
+  }, []);
+
+  const scrollToSection = (ref, sectionId) => {
+    if (ref.current) {
+      const navbarHeight = 64; // h-16 = 64px
+      const elementPosition = ref.current.offsetTop - navbarHeight;
+
+      // Use setTimeout to ensure DOM is ready
+      setTimeout(() => {
+        window.scrollTo({
+          top: elementPosition,
+          behavior: 'smooth'
+        });
+      }, 100);
+    }
+    setActiveSection(sectionId);
+    setIsMenuOpen(false); // Close mobile menu after navigation
   };
 
-  const skills = ['CodeIgniter', 'Laravel', 'Flutter', 'Golang','ReactJs','MySQL','Docker','Git','RESTful API'];
+  const skills = ['CodeIgniter', 'Laravel', 'Flutter', 'Golang','ReactJs','MySQL','Docker','Git','RESTful API', 'Redis'];
 const experiences = [
      {
       title: 'System Developer',
@@ -82,37 +236,37 @@ const experiences = [
       description: 'Leading development of enterprise web applications using Laravel and modern web technologies.'
      },
      {
-    title: 'Director',
-    company: 'PT 2025 Solusi Digital Kita',
-    period: 'Present',   
-    description: 'Developed backend systems and APIs for various clients using PHP, Laravel, and Golang.'
+      title: 'Director',
+      company: 'PT 2025 Solusi Digital Kita',
+      period: 'Present',   
+      description: 'Developed HRIS systems and APIs for various clients using PHP, Laravel, and Golang.'
      },
-  {
-    title: 'Commissioner',
-    company: 'PT Cyber Lentera 2025',
-    period: 'Present',
-    description: 'Developed backend systems and APIs for various clients using PHP, Laravel, and Golang.'
-  },
-  {
-    title: 'Web Developer',
-    company: 'PT.BPR Kredit Mandiri',
-    period: '2021-2022',
-    description: 'Developed backend systems and APIs for various clients using PHP, Laravel, and Golang.'
-  },   
+    {
+      title: 'Commissioner',
+      company: 'PT Cyber Lentera 2025',
+      period: 'Present',
+      description: 'Developed Cyber security systems and APIs for various clients using Reactjs and Golang with microservices architechture.'
+    },
+    {
+      title: 'Web Developer',
+      company: 'PT.BPR Kredit Mandiri',
+      period: '2021-2022',
+      description: 'Developed internal operation systems using PHP, Codeigniter 3.'
+    },   
 ];
   const projects = [
      {
       name: 'Centro (Central Operasional)',
       command : 'centro',
       description: 'Operational system for BPR Kredit Mandiri',
-      title: 'WorkOrder App',
+      title: 'Centro',
       tech: 'CodeIgniter 3 Full Stack',
      },
      {
       name: 'CMS (Customer Management System)',
       command : 'cms',
       description: 'Customer management and tracking system',
-      title: 'WorkOrder App',
+      title: 'CMS',
       tech: 'CodeIgniter 3 Full Stack',
     },
     {
@@ -124,7 +278,7 @@ const experiences = [
     },
     {
       name: 'Work Order',
-      command : 'workorder',
+      command : 'work-order',
       description: 'IT ticketing system for IT support',
       title: 'WorkOrder App',
       tech: 'Laravel 8 Full Stack + Laravel API + Flutter Mobile',
@@ -133,7 +287,7 @@ const experiences = [
       name: 'IMS (Inventory Management System)',
       command : 'ims',
       description: 'Control and monitoring of consumable items',
-       title: 'ims',
+       title: 'IMS App',
       tech: 'CodeIgniter 3 Full Stack',
     },
     {
@@ -187,6 +341,7 @@ const experiences = [
     { name: 'Experience', ref: experienceRef },
     { name: 'Projects', ref: projectsRef },
     { name: 'Education', ref: educationRef },
+    { name: 'Contact', ref: contactRef },
   ];
 
   if (isLoading) {
@@ -227,9 +382,9 @@ const experiences = [
                 whileHover={{ scale: 1.05 }}
               >
                 <div className="w-8 h-8 bg-gradient-to-br from-neon-cyan to-neon-blue rounded-lg flex items-center justify-center">
-                  <span className="text-black font-bold text-sm">BS</span>
+                  <span className="text-black font-bold text-sm">T</span>
                 </div>
-                <span className="text-neon-cyan font-mono font-bold text-lg tracking-wider">BAGOES</span>
+                <span className="text-neon-cyan font-mono font-bold text-lg tracking-wider">TOMO</span>
               </motion.div>
             </div>
 
@@ -239,8 +394,12 @@ const experiences = [
                 {navItems.map((item, index) => (
                   <motion.button
                     key={item.name}
-                    onClick={() => scrollToSection(item.ref)}
-                    className="relative px-4 py-2 text-sm font-medium text-gray-300 hover:text-neon-cyan transition-all duration-300 rounded-lg group"
+                    onClick={() => scrollToSection(item.ref, item.name.toLowerCase())}
+                    className={`relative px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg group ${
+                      activeSection === item.name.toLowerCase()
+                        ? 'text-neon-cyan'
+                        : 'text-gray-300 hover:text-neon-cyan'
+                    }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -254,9 +413,11 @@ const experiences = [
                     />
                     {/* Active indicator */}
                     <motion.div
-                      className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-neon-cyan rounded-full"
-                      initial={{ width: 0 }}
-                      whileHover={{ width: '60%' }}
+                      className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 h-0.5 bg-neon-cyan rounded-full transition-all duration-300 ${
+                        activeSection === item.name.toLowerCase()
+                          ? 'w-full'
+                          : 'w-0 group-hover:w-3/4'
+                      }`}
                       transition={{ duration: 0.3 }}
                     />
                   </motion.button>
@@ -267,12 +428,13 @@ const experiences = [
             {/* Mobile Menu Button */}
             <div className="md:hidden">
               <motion.button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="p-2 text-gray-300 hover:text-neon-cyan transition-colors duration-300"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
                 </svg>
               </motion.button>
             </div>
@@ -290,6 +452,35 @@ const experiences = [
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{
+            opacity: isMenuOpen ? 1 : 0,
+            height: isMenuOpen ? 'auto' : 0
+          }}
+          transition={{ duration: 0.3 }}
+          className="md:hidden overflow-hidden bg-black/95 backdrop-blur-xl border-t border-neon-cyan/30"
+        >
+          <div className="px-4 py-4 space-y-2">
+            {navItems.map((item, index) => (
+              <motion.button
+                key={item.name}
+                onClick={() => scrollToSection(item.ref, item.name.toLowerCase())}
+                className={`block w-full text-left px-4 py-3 text-sm font-medium transition-all duration-300 rounded-lg ${
+                  activeSection === item.name.toLowerCase()
+                    ? 'text-neon-cyan bg-neon-cyan/10 border-l-4 border-neon-cyan'
+                    : 'text-gray-300 hover:text-neon-cyan hover:bg-neon-cyan/5'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {item.name}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
 
         {/* Animated border */}
         <motion.div
@@ -350,14 +541,53 @@ const experiences = [
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 2 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="text-center space-y-4"
           >
-            <button className="px-6 py-3 bg-neon-cyan text-black font-semibold rounded-lg hover:neon-glow transition-all duration-300 transform hover:scale-105">
-              Download CV
-            </button>
-            <button className="px-6 py-3 border border-neon-cyan text-neon-cyan font-semibold rounded-lg hover:bg-neon-cyan hover:text-black transition-all duration-300 transform hover:scale-105">
-              Contact Me
-            </button>
+            <motion.div
+              className="bg-black/60 backdrop-blur-sm border border-neon-cyan/30 rounded-lg p-4 max-w-md mx-auto"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 2.5 }}
+            >
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-xs text-gray-400 font-mono ml-2">terminal</span>
+              </div>
+              <div className="text-left">
+                <span className="text-green-400 font-mono text-sm">$ </span>
+                <span className="text-neon-cyan font-mono text-sm">
+                  {codeSnippet}
+                  <span className="animate-pulse">|</span>
+                </span>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="flex justify-center space-x-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 3 }}
+            >
+              <div className="flex space-x-2">
+                <motion.div
+                  className="w-2 h-2 bg-neon-cyan rounded-full"
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                <motion.div
+                  className="w-2 h-2 bg-neon-blue rounded-full"
+                  animate={{ opacity: [0.3, 1, 0.3] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                />
+                <motion.div
+                  className="w-2 h-2 bg-green-400 rounded-full"
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                />
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -373,6 +603,8 @@ const experiences = [
       </section>
 
       <EducationSection educationRef={educationRef} education={education} />
+
+      <ContactSection contactRef={contactRef} />
     </div>
   );
 };
